@@ -4,16 +4,15 @@
 //#include <absacc.h>   
 #include "keyboard.h"
 #include "lcd9648_screen.h"
-//#include "lcd9648_graphics.h"
 #include "game.h"
-	
+
 void main()
 {									   
 	uint16 key;
 	static int16 timer;
  	
 	LCD9648_Init();
-	Game_DrawBackground();	  
+	Game_DrawBackground();
 
 	while(1)
 	{		

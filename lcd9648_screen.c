@@ -22,7 +22,7 @@ void Delay10ms(uint16 c)   //误差 0us
 			for(a=130;a>0;a--);
 }
 */
-static void SendDataSPI(uint8 dat)
+static void LCD9648_SendDataSPI(uint8 dat)
 {  
 	uint8 i;
    
@@ -43,22 +43,22 @@ static void SendDataSPI(uint8 dat)
 	}
 }
   
-static void WriteComm(uint8 i)
+static void LCD9648_WriteComm(uint8 i)
 {
     LCD9648_CS0 = 0;
 	LCD9648_RS  = 0;
 
-	SendDataSPI(i);
+	LCD9648_SendDataSPI(i);
 
 	LCD9648_CS0 = 1;
 }
 
-static void WriteData(uint8 i)
+static void LCD9648_WriteData(uint8 i)
 {
     LCD9648_CS0 = 0;
 	LCD9648_RS  = 1;
 
-	SendDataSPI(i);
+	LCD9648_SendDataSPI(i);
 
 	LCD9648_CS0 = 1;
 }
@@ -75,26 +75,26 @@ void LCD9648_Init()
 	LCD9648_RST=1;
 	for (i = 0; i < 1000; i++);
 
-	WriteComm(0xe2);		  	//软件复位
-	WriteComm(0xc8);		  	//0xA0段方向选择正常方向（0xA1为反方向
-	WriteComm(0xa0);		  	//0xC8普通方向选择选择反向，0xC0为正常方向
-	WriteComm(0x2f);
-	WriteComm(0x26);
-	WriteComm(0x81);		  	//背景光对比度
-	WriteComm(0x10);		  	//0x10设置列高地址 
-	WriteComm(0xaf);		  	//开启显示
-	//WriteComm(0xa4);
+	LCD9648_WriteComm(0xe2);		  	//软件复位
+	LCD9648_WriteComm(0xc8);		  	//0xA0段方向选择正常方向（0xA1为反方向
+	LCD9648_WriteComm(0xa0);		  	//0xC8普通方向选择选择反向，0xC0为正常方向
+	LCD9648_WriteComm(0x2f);
+	LCD9648_WriteComm(0x26);
+	LCD9648_WriteComm(0x81);		  	//背景光对比度
+	LCD9648_WriteComm(0x10);		  	//0x10设置列高地址 
+	LCD9648_WriteComm(0xaf);		  	//开启显示
+	//LCD9648_WriteComm(0xa4);
 	
 	for(i = 0; i < 9; i++)				//一共九页			   
 	{
-		WriteComm(0x40);  		//set scroll line 		设置滚动一行
-		WriteComm(0xb0 | i);	//set page address		设置页地址
-		WriteComm(0x10);  		//column  msb		    列最高位
-		WriteComm(0x00);  		//column  lsb		    列最低位
+		LCD9648_WriteComm(0x40);  		//set scroll line 		设置滚动一行
+		LCD9648_WriteComm(0xb0 | i);	//set page address		设置页地址
+		LCD9648_WriteComm(0x10);  		//column  msb		    列最高位
+		LCD9648_WriteComm(0x00);  		//column  lsb		    列最低位
 		
 		for(j = 0; j < LCD9648_SCREEN_WIDTH; j++)
 		{
-			WriteData(0);	
+			LCD9648_WriteData(0);	
 		}
 	}
 
@@ -118,28 +118,28 @@ int8 LCD9648_GetPixel(int8 x, int8 y)
 	return (mScreenMapBuf[y >> 3][x] & BitPos[y & 7]);	
 }
 
-
 void LCD9648_Clear()
 {
-	memset(mScreenMapBuf, 0, sizeof(mScreenMapBuf));	
-}
-
-void LCD9648_DrawFillArea(int8 nArea, uint8 val)
-{
-	int8 x;
-	for (x = 0; x < LCD9648_SCREEN_WIDTH; x++)
-	{
-	 	mScreenMapBuf[nArea][x] |= val;
-	}		
+	LCD9648_DrawFill(0);	
 }
 
 void LCD9648_DrawFill(uint8 val)
 {
-	int8 a;
-	for (a = 0; a < LCD9648_AREA_COUNT; a++)
+	memset(mScreenMapBuf, val, sizeof(mScreenMapBuf));		
+}
+
+void LCD9648_FillRectangle(int8 x, int8 y, int8 w, int8 h, int8 bLight)
+{
+	int8 i, j, tx, ty;
+	for (i = 0; i < w; i++)
 	{
-	 	LCD9648_DrawFillArea(a, val);
-	}		
+		tx = x + i;
+		for (j = 0; j < h; j++)
+		{
+			ty = y + j;
+			LCD9648_SetPixel(tx, ty, bLight);	
+		}
+	}	
 }
 
 void LCD9648_Flush()
@@ -147,14 +147,14 @@ void LCD9648_Flush()
 	int8 x, a;
 	for(a = 0; a < LCD9648_AREA_COUNT; a++)			   
 	{
-		WriteComm(0x40);  			//set scroll line 		设置滚动一行
-		WriteComm(0xb0 | a);		//set page address		设置页地址
-		WriteComm(0x10);  			//column  msb		    列最高位
-		WriteComm(0x00);  			//column  lsb		    列最低位
+		LCD9648_WriteComm(0x40);  			//set scroll line 		设置滚动一行
+		LCD9648_WriteComm(0xb0 | a);		//set page address		设置页地址
+		LCD9648_WriteComm(0x10);  			//column  msb		    列最高位
+		LCD9648_WriteComm(0x00);  			//column  lsb		    列最低位
 		
 		for(x = 0; x < LCD9648_SCREEN_WIDTH; x++)
 		{
-			WriteData(mScreenMapBuf[a][x]);	
+			LCD9648_WriteData(mScreenMapBuf[a][x]);	
 		}
 	}		
 }
