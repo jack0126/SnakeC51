@@ -28,7 +28,7 @@ int16 Keyboard_ReadKey()
 
 	return 0;
 }
-
+/*
 int16 Keyboard_ReadKeyEx()
 {	
 	static uint16 cacheKey = 0, k;
@@ -59,3 +59,4 @@ int16 Keyboard_ReadKeyEx()
 
 	return 0;
 } 
+*/
