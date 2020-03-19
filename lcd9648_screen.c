@@ -120,12 +120,19 @@ int8 LCD9648_GetPixel(int8 x, int8 y)
 
 void LCD9648_Clear()
 {
-	LCD9648_DrawFill(0);	
+	memset(mScreenMapBuf, 0, sizeof(mScreenMapBuf));	
 }
 
 void LCD9648_DrawFill(uint8 val)
 {
-	memset(mScreenMapBuf, val, sizeof(mScreenMapBuf));		
+	int8 x, a;
+	for(a = 0; a < LCD9648_AREA_COUNT; a++)			   
+	{
+		for(x = 0; x < LCD9648_SCREEN_WIDTH; x++)
+		{
+			mScreenMapBuf[a][x] |= val;	
+		}
+	}		
 }
 
 void LCD9648_FillRectangle(int8 x, int8 y, int8 w, int8 h, int8 bLight)
